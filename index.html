@@ -305,6 +305,12 @@ section{padding-block:clamp(2.5rem,6vw,4.5rem);scroll-margin-top:72px}
   letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.9rem;
 }
 .case p{color:var(--mute);font-size:0.95rem}
+.case-link{
+  display:inline-flex;align-items:center;gap:0.35rem;margin-top:1rem;
+  font-family:var(--mono);font-size:0.68rem;letter-spacing:0.09em;
+  text-transform:uppercase;color:var(--signal);
+}
+.case-link:hover{text-decoration:underline;text-underline-offset:0.25rem}
 .chips{display:flex;flex-wrap:wrap;gap:0.4rem}
 .chip{
   font-family:var(--mono);font-size:0.63rem;letter-spacing:0.07em;
@@ -550,7 +556,7 @@ footer{padding-block:1rem 2.8rem;font-family:var(--mono);font-size:0.68rem;color
 <main>
 
 <section id="work" class="wrap rise">
-  <div class="sec-head"><h2>Selected work</h2><span class="tag">04 systems</span></div>
+  <div class="sec-head"><h2>Selected work</h2><span class="tag">05 systems</span></div>
   <div class="work">
 
     <article class="case">
@@ -594,6 +600,18 @@ footer{padding-block:1rem 2.8rem;font-family:var(--mono);font-size:0.68rem;color
       <div class="case-meta">
         <span class="where">Farrow</span>
         <div class="chips"><span class="chip">Spring Batch</span><span class="chip">EDI ANSI X12</span><span class="chip">DB2</span><span class="chip">Hibernate</span><span class="chip">SFTP</span></div>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="case-main">
+        <h3>Bali Diagnostics</h3>
+        <p>A responsive, multilingual diagnostics booking website with health packages, an individual test catalog, and a booking flow.</p>
+        <a class="case-link" href="https://github.com/gauravsharma11/bali-clinical-lab" target="_blank" rel="noopener noreferrer" aria-label="View Bali Diagnostics source on GitHub (opens in a new tab)">View source on GitHub <span aria-hidden="true">&nearr;</span></a>
+      </div>
+      <div class="case-meta">
+        <span class="where">Side project</span>
+        <div class="chips"><span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span></div>
       </div>
     </article>
 
