@@ -429,6 +429,21 @@ a.line:hover .k svg{color:var(--signal)}
 }
 .f-field input:focus,.f-field textarea:focus{outline:none;border-color:var(--signal);background:var(--raise)}
 .f-field textarea{min-height:110px}
+.f-mic-wrap{position:relative}
+.f-mic-wrap textarea{padding-right:3rem}
+.f-mic{
+  position:absolute;right:0.6rem;bottom:0.6rem;width:34px;height:34px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid var(--line);border-radius:3px;
+  color:var(--mute);cursor:pointer;transition:color .2s,border-color .2s,background .2s;
+}
+.f-mic:hover{color:var(--signal);border-color:var(--signal)}
+.f-mic svg{width:16px;height:16px}
+.f-mic.listening{color:var(--signal);border-color:var(--signal);animation:mic-pulse 1.6s ease-in-out infinite}
+@keyframes mic-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(245,165,36,.35)}
+  50%{box-shadow:0 0 0 6px rgba(245,165,36,0)}
+}
 .f-submit{
   display:inline-flex;align-items:center;gap:0.6rem;
   min-height:46px;padding:0 1.4rem;border-radius:3px;border:none;cursor:pointer;
@@ -714,7 +729,12 @@ footer{padding-block:1rem 2.8rem;font-family:var(--mono);font-size:0.68rem;color
     </div>
     <div class="f-field">
       <label for="cf-message">Message</label>
-      <textarea id="cf-message" name="message" required></textarea>
+      <div class="f-mic-wrap">
+        <textarea id="cf-message" name="message" required></textarea>
+        <button type="button" id="micBtn" class="f-mic" aria-label="Dictate message using your microphone" title="Dictate message" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M8.5 21h7"/></svg>
+        </button>
+      </div>
     </div>
     <button type="submit" class="f-submit">Send message</button>
     <p id="formStatus" class="f-status" role="status"></p>
@@ -926,6 +946,61 @@ footer{padding-block:1rem 2.8rem;font-family:var(--mono);font-size:0.68rem;color
         btn.textContent = 'Send message';
       });
     });
+  }
+
+  /* mic option — dictate the contact message via the Web Speech API */
+  var micBtn = document.getElementById('micBtn');
+  if(micBtn){
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(SR){
+      micBtn.hidden = false;
+      micBtn.setAttribute('aria-pressed','false');
+      var micTa = document.getElementById('cf-message');
+      var rec = new SR();
+      var micOn = false;
+      var baseText = '';
+      rec.lang = 'en-US';
+      rec.interimResults = true;
+      rec.continuous = true;
+
+      function micStop(){ micOn = false; micBtn.classList.remove('listening'); micBtn.setAttribute('aria-pressed','false'); }
+
+      micBtn.addEventListener('click', function(){
+        if(micOn){ micOn = false; rec.stop(); return; }
+        baseText = micTa.value;
+        try { rec.start(); micOn = true; micBtn.classList.add('listening'); micBtn.setAttribute('aria-pressed','true'); }
+        catch(err){ micStop(); }
+      });
+
+      rec.addEventListener('result', function(e){
+        var text = baseText;
+        for(var i = 0; i < e.results.length; i++){
+          var t = e.results[i][0].transcript;
+          text += (text && !/\s$/.test(text) ? ' ' : '') + t;
+        }
+        micTa.value = text;
+      });
+
+      /* Chrome ends recognition after a pause — restart while the user still wants to dictate */
+      rec.addEventListener('end', function(){
+        if(micOn){
+          baseText = micTa.value;
+          micOn = false;
+          try { rec.start(); micOn = true; return; } catch(err){}
+        }
+        micStop();
+      });
+
+      rec.addEventListener('error', function(e){
+        micOn = false;
+        micStop();
+        if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+          var status = document.getElementById('formStatus');
+          status.textContent = 'Microphone access was blocked — allow it in your browser to dictate, or just type.';
+          status.className = 'f-status err';
+        }
+      });
+    }
   }
 
   /* copy email to clipboard */
